@@ -1,0 +1,4 @@
+/notebooks/media/
+*.pyc
+.swp
+.swo

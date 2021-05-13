@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Script summary:
+#  - delete any previous Docker container that has the name 'csj'
+#  - (re)build a Docker image, called 'csi' 
+#  - run a docker container named 'csj' using image 'csi'
+#      - the container will start Jupyter Lab on 0.0.0.0:8888
+#      - the container's port 8888 will be mapped to the host port 8888
+#      - all available GPUs will be used
+
+# Remark: Originally, this file was used in a project called 'colorspace', 
+# which led to  the prefix 'cs'. 
+docker build -t manimi ./ 
+docker rm manim
+docker run -it \
+--name manim \
+-p 0.0.0.0:8888:8888 \
+-v $(pwd)/notebooks:/manim/notebooks \
+manimi \
+jupyter lab --notebook-dir='./notebooks' --no-browser --ip=0.0.0.0 --port=8888 
