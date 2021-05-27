@@ -1,40 +1,35 @@
-FROM manimcommunity/manim:v0.6.0
+FROM ubuntu:20.04
 
+ARG USER_ID=1001
+ARG GROUP_ID=101
+RUN addgroup --gid $GROUP_ID manim
+RUN adduser --disabled-password --gecos '' --uid $USER_ID --gid $GROUP_ID manim
+WORKDIR /manim
 
-RUN mkdir /manim/.jupyter
-RUN mkdir /manim/.jupyter/custom
-RUN echo "div video { max-width: 60vw; }" > /manim/.jupyter/custom/custom.css
+# tzdata configuration stops for an interactive prompt without the env var.
+# https://serverfault.com/questions/949991/how-to-install-tzdata-on-a-ubuntu-docker-image
+ARG DEBIAN_FRONTEND=noninteractive
+ENV TZ=Asia/Tokyo
+RUN apt-get update && apt-get install --no-install-recommends -y \
+     tzdata
+RUN apt-get install --no-install-recommends -y \
+	 build-essential \
+     libpango1.0-dev \
+	 freeglut3-dev \
+     python3-dev \
+     pkg-config \
+	 ffmpeg  \
+     latexmk \ 
+     pip \
+     texlive && \ 
+	 rm -rf /var/lib/apt/lists/*
 
-RUN pip install easydev matplotlib palettable colormap
+RUN pip install manimgl 
 
-# USER root
-# WORKDIR /root
-# ENV HOME /
+USER manim
 
-# ARG CONDA_VERSION=py38_4.9.2
-# ARG CONDA_MD5=122c8c9beb51e124ab32a0fa6426c656
+COPY ./ ./
 
-# RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-${CONDA_VERSION}-Linux-x86_64.sh -O miniconda.sh && \
-#     echo "${CONDA_MD5}  miniconda.sh" > miniconda.md5 && \
-# 	if ! md5sum --status -c miniconda.md5; then exit 1; fi && \
-# 	mkdir -p /opt && \
-# 	sh miniconda.sh -b -p /opt/conda && \
-# 	rm miniconda.sh miniconda.md5 && \
-# 	ln -s /opt/conda/etc/profile.d/conda.sh /etc/profile.d/conda.sh && \
-# 	echo ". /opt/conda/etc/profile.d/conda.sh" >> ~/.bashrc && \
-# 	echo "conda activate base" >> ~/.bashrc && \
-# 	find /opt/conda/ -follow -type f -name '*.a' -delete && \
-# 	find /opt/conda/ -follow -type f -name '*.js.map' -delete && \
-# 	/opt/conda/bin/conda clean -afy
-# 
-# # RUN wget --quiet \ https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh \ && mkdir /root/.conda \ && bash Miniconda3-latest-Linux-x86_64.sh -b \ && rm -f Miniconda3-latest-Linux-x86_64.sh 
-# # Usering /manim/... as the manim dockerfile sets /manim to home env var.
-# ENV PATH $PATH:/manim/miniconda3/bin
-# run /manim/miniconda3/bin --version
-# #RUN conda --version
-# #RUN conda install --yes nodejs'>=12.0.0'
-# #RUN jupyter labextension install @axlair/jupyterlab_vim
-# #USER ${NB_USER}
-# WORKDIR manim
-# USER manimuser
-
+# Install our own project as a module.
+# This is done so the tests can import it.
+# RUN pip install .
