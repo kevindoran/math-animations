@@ -1,0 +1,7 @@
+#!/bin/bash
+docker run -it \
+-v $(pwd)/notebooks:/app/notebooks \
+-v $(pwd)/src:/app/src \
+-p 0.0.0.0:8888:8888 \
+manim_ce_i \
+$1
